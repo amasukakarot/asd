@@ -1,0 +1,44 @@
+# ... Deployment YAML definition
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-deployment-def
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: test
+  template:
+    metadata:
+      labels:
+        app: test
+    spec:
+      containers:
+        - name: my-container-app
+          image: my-app-1
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 3000
+          resources:
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+
+
+
+
+
+---
+
+# ... Service YAML definition
+apiVersion: v1
+kind: Service
+metadata:
+  name: app-service
+spec:
+  selector:
+    app: test
+  ports:
+    - port: 80
+      targetPort: 3000
+  type: LoadBalancer

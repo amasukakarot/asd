@@ -1,0 +1,65 @@
+# ... Deployment YAML definition
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-deployment #name for the actual deployment itself
+spec: #specification of configuration that you want to apply to the deployment.
+  replicas: 2
+  selector:
+    matchLabels:
+      app: myapp-pods-labels #selects those pods with the key value pair app: myapp-pods. ReplicaSet is managing pods with label app:myapp-service-connector
+      #.spec.selector must match .spec.template.metadata.labels or it gets rejected by the api.
+  template: #This is the configuration for a pod
+    metadata:
+      labels:
+        app: myapp-pods-labels #defines a label for the pods
+    spec: #blueprint for a pod
+      containers:
+      - name: myapp
+        image: my-app-1
+        imagePullPolicy: Never
+        resources:
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        ports:
+          - containerPort: 3000 #port the container listens on - this is purely informational, similar to a docker EXPOSE. It is a good practice.
+      - name: myapp2
+        image: my-app-2
+        imagePullPolicy: Never
+        resources:
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 8100 #port the container listens on - this is purely informational, similar to a docker EXPOSE. It is a good practice.
+
+---
+# ... Service YAML definition
+#apiVersion: v1
+#kind: Service
+#metadata:
+#  name: myapp-service
+#spec:
+#  selector:
+#    app: myapp-pods-labels #service connects to pods with the same label
+#  ports:
+#  - port: 80
+#    targetPort: 8100
+#  type: LoadBalancer
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: myapp-service
+spec:
+  selector:
+    app: myapp-pods-labels #service connects to pods with the same label
+  ports:
+    - name: my-app-1-port
+      port: 80
+      targetPort: 3000
+    - name: my-app-2-port
+      port: 81
+      targetPort: 8100
+  type: LoadBalancer
